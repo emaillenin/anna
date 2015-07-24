@@ -56,6 +56,10 @@ class App {
 
         chan.on("new:msg", msg => {
             $messages.append(this.messageTemplate(msg));
+            var u = new SpeechSynthesisUtterance();
+            u.text = msg.body;
+            u.lang = language == "en" ? 'en-US' : 'it-IT';
+            speechSynthesis.speak(u);
             scrollTo(0, document.body.scrollHeight)
         });
 
