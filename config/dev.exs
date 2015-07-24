@@ -30,6 +30,6 @@ config :logger, :console, format: "[$level] $message\n"
 config :anna, Anna.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
-  password: "postgres",
+  password: "pass",
   database: "anna_dev",
   size: 10 # The amount of database connections in the pool

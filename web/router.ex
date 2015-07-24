@@ -8,6 +8,10 @@ defmodule Anna.Router do
     plug :protect_from_forgery
   end
 
+  socket "/ws", Anna do
+    channel "rooms:*", RoomChannel
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end

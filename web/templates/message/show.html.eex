@@ -1,0 +1,22 @@
+<h2>Show message</h2>
+
+<ul>
+
+  <li>
+    <strong>Content:</strong>
+    <%= @message.content %>
+  </li>
+
+  <li>
+    <strong>Owner:</strong>
+    <%= @message.owner %>
+  </li>
+
+  <li>
+    <strong>Language:</strong>
+    <%= @message.language %>
+  </li>
+
+</ul>
+
+<%= link "Back", to: message_path(@conn, :index) %>
