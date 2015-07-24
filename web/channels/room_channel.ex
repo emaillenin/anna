@@ -1,5 +1,7 @@
 defmodule Anna.RoomChannel do
   use Phoenix.Channel
+  use HTTPotion.Base
+  require IEx
   alias Anna.Message
   alias Anna.Repo
   require Logger
@@ -54,9 +56,46 @@ defmodule Anna.RoomChannel do
   end
 
   def handle_in("new:msg", msg, socket) do
+    # IEx.pry
     broadcast! socket, "new:msg", %{user: msg["user"], body: msg["body"]}
+
+    Anna.Endpoint.broadcast_from! self(), get_other_room(socket.topic), "new:msg", %{user: msg["user"], body: translate(msg["body"], socket.topic)}
     changeset = Message.changeset(%Message{}, %{content: msg["body"], owner: msg["user"], language: msg["language"]})
     Repo.insert!(changeset)
     {:reply, {:ok, %{msg: msg["body"]}}, assign(socket, :user, msg["user"])}
   end
+
+  def translate(source, room) do
+    source_language = get_language(:room, room)
+    target_language = get_other_language(:language, source_language)
+    response = HTTPotion.get(URI.encode("https://www.googleapis.com/language/translate/v2?q=#{source}&target=#{target_language}&format=text&source=#{source_language}&key=AIzaSyAyAlmnIMljyr3mo-W1xVgtAmH-8Ie7oXA"))
+    available_translations = Poison.Parser.parse!(response.body)["data"]["translations"]
+    case length(available_translations) do
+      0 -> ""
+      _ ->  [he | ta] = available_translations
+            he["translatedText"]
+    end
+  end
+
+  def get_other_room(room) do
+
+    case room do
+        "rooms:en" -> "rooms:it"
+        _ ->  "rooms:en"
+      end
+   end
+
+   def get_language(:room, room) do
+      case room do
+          "rooms:en" -> "en"
+          _ ->  "it"
+      end
+   end
+
+    def get_other_language(:language,language ) do
+       case language do
+           "en" -> "it"
+           _ ->  "en"
+       end
+    end
 end
