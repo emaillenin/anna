@@ -13,6 +13,7 @@ class App {
         var $input = $("#message-input");
         var $username = $("#username");
         var $language = $("#language");
+        var $speakButton = $("#speak-button");
 
         socket.onClose(e => console.log("CLOSE", e));
 
@@ -28,6 +29,20 @@ class App {
                 chan.push("new:msg", {user: $username.val(), body: $input.val(), language: $language.val()});
                 $input.val("")
             }
+        });
+
+        $speakButton.on("click", function() {
+            var recognizer = new webkitSpeechRecognition();
+            recognizer.lang = $language.val();
+            recognizer.onresult = function(event) {
+                if (event.results.length > 0) {
+                    var result = event.results[event.results.length-1];
+                    if(result.isFinal) {
+                        $input.val(result[0].transcript);
+                    }
+                }
+            };
+            recognizer.start();
         });
 
 

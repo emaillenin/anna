@@ -15,6 +15,7 @@
       </div>
       <input type="text" id="username" value="Anna">
       <input type='text' id="message-input" value="Message">
+      <button value="Speak" id="speak-button">Speak</button>
     </div>
   </div>
 </div>
