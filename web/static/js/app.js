@@ -31,20 +31,72 @@ class App {
             }
         });
 
-        $speakButton.on("click", function() {
-            var recognizer = new webkitSpeechRecognition();
-            recognizer.lang = $language.val();
-            recognizer.onresult = function(event) {
-                if (event.results.length > 0) {
-                    var result = event.results[event.results.length-1];
-                    if(result.isFinal) {
-                        $input.val(result[0].transcript);
-                    }
-                }
-            };
-            recognizer.start();
-        });
+        var final_transcript = '';
+        var recognizing = false;
+        var ignore_onend;
+        var start_timestamp;
 
+        var recognition = new webkitSpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onstart = function() {
+            recognizing = true;
+        };
+
+        recognition.onend = function() {
+            recognizing = false;
+            if (ignore_onend) {
+                return;
+            }
+            if (!final_transcript) {
+                return;
+            }
+        };
+
+        recognition.onresult = function(event) {
+            var interim_transcript = '';
+            for (var i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    final_transcript += event.results[i][0].transcript;
+                } else {
+                    interim_transcript += event.results[i][0].transcript;
+                }
+            }
+            final_transcript = capitalize(final_transcript);
+            console.log(interim_transcript);
+            console.log(final_transcript);
+            $input.val(final_transcript);
+            if (final_transcript == '') {
+                $input.val(interim_transcript);
+            } else {
+                $input.val(final_transcript);
+            }
+        };
+
+        var two_line = /\n\n/g;
+        var one_line = /\n/g;
+
+        function linebreak(s) {
+            return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
+        }
+
+        var first_char = /\S/;
+        function capitalize(s) {
+            return s.replace(first_char, function(m) { return m.toUpperCase(); });
+        }
+
+        $speakButton.on('click', function(event) {
+            if (recognizing) {
+                recognition.stop();
+                return;
+            }
+            final_transcript = '';
+            recognition.lang = $language.val();
+            recognition.start();
+            ignore_onend = false;
+            start_timestamp = event.timeStamp;
+        });
 
     }
 
