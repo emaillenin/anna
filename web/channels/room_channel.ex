@@ -68,7 +68,7 @@ defmodule Anna.RoomChannel do
   def translate(source, room) do
     source_language = get_language(:room, room)
     target_language = get_other_language(:language, source_language)
-    response = HTTPotion.get(URI.encode("https://www.googleapis.com/language/translate/v2?q=#{source}&target=#{target_language}&format=text&source=#{source_language}&key=AIzaSyAyAlmnIMljyr3mo-W1xVgtAmH-8Ie7oXA"))
+    response = HTTPotion.get(URI.encode("https://www.googleapis.com/language/translate/v2?q=#{source}&target=#{target_language}&format=text&source=#{source_language}&key="))
     available_translations = Poison.Parser.parse!(response.body)["data"]["translations"]
     case length(available_translations) do
       0 -> ""
